@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>French Numbers</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <!-- ── Top bar ──────────────────────────────────────── -->
+  <header class="top-bar">
+    <span class="greeting">Bonjour, <strong>{{ username }}</strong></span>
+    <div class="top-bar-right">
+      <button class="icon-btn" id="prefs-open-btn" title="Preferences">⚙</button>
+      <a href="{{ url_for('logout') }}" class="logout-link">Logout</a>
+    </div>
+  </header>
+
+  <!-- ── Preferences panel (overlay) ─────────────────── -->
+  <div class="prefs-overlay hidden" id="prefs-overlay">
+    <div class="prefs-panel">
+      <h2>Preferences</h2>
+
+      <fieldset class="pref-fieldset">
+        <legend>Exercise type</legend>
+        <label><input type="radio" name="exercise_type" value="all">      All (mix of everything)</label>
+        <label><input type="radio" name="exercise_type" value="years">    Years (1900–2025)</label>
+        <label><input type="radio" name="exercise_type" value="prices">   Prices in euros</label>
+        <label><input type="radio" name="exercise_type" value="numbers">  Large numbers</label>
+      </fieldset>
+
+      <fieldset class="pref-fieldset">
+        <legend>Speaker voice</legend>
+        <label><input type="radio" name="voice_pref" value="female"> Female</label>
+        <label><input type="radio" name="voice_pref" value="male">   Male</label>
+      </fieldset>
+
+      <fieldset class="pref-fieldset">
+        <legend>Speaking speed</legend>
+        <label><input type="radio" name="speed_pref" value="slow">   Slow</label>
+        <label><input type="radio" name="speed_pref" value="normal"> Normal</label>
+        <label><input type="radio" name="speed_pref" value="fast">   Fast</label>
+      </fieldset>
+
+      <div class="session-size-row">
+        <label for="session-size-input">Items per session</label>
+        <input id="session-size-input" type="number" min="1" max="50" value="10">
+      </div>
+
+      <div class="prefs-actions">
+        <button class="start-btn" id="start-session-btn">Start Session</button>
+        <button class="cancel-btn" id="prefs-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main content ─────────────────────────────────── -->
+  <div class="page-wrapper">
+
+    <!-- Progress bar -->
+    <div class="progress-area hidden" id="progress-area">
+      <div class="progress-text" id="progress-text">0 / 0</div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- ── Card scene ─────────────────────────────────── -->
+    <div class="card-scene">
+
+      <!-- Active exercise card -->
+      <div class="card" id="exercise-card">
+        <p class="prompt-text" id="prompt-text">Loading…</p>
+
+        <div class="audio-row">
+          <button class="play-btn" id="play-btn" title="Play / Replay">▶ Play</button>
+          <span class="hint-text" id="hint-text"></span>
+        </div>
+
+        <div class="answer-area" id="answer-area">
+          <input
+            type="text"
+            id="answer-input"
+            class="answer-input"
+            placeholder="Type what you heard…"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <button class="submit-btn" id="submit-btn">Submit</button>
+        </div>
+
+        <!-- Result shown after submitting -->
+        <div class="result-area hidden" id="result-area">
+          <p class="result-msg" id="result-msg"></p>
+          <p class="correct-display" id="correct-display"></p>
+        </div>
+      </div>
+
+      <!-- Session complete screen -->
+      <div class="card complete-card hidden" id="complete-card">
+        <p class="complete-msg" id="complete-msg"></p>
+        <div class="complete-actions">
+          <button class="start-btn" id="redo-session-btn">Redo Session</button>
+          <button class="start-btn" id="new-session-btn">New Session</button>
+        </div>
+      </div>
+
+    </div><!-- /.card-scene -->
+
+    <!-- Next button (appears after answering) -->
+    <button class="next-btn hidden" id="next-btn">Suivant →</button>
+
+  </div><!-- /.page-wrapper -->
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Generated database — recreate with: python3 populate_db.py
+database.db
+
+# Claude Code local settings
+.claude/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# OS
+.DS_Store
