@@ -37,7 +37,7 @@ def generate_year():
         'answer':  str(year),
         'display': str(year),
         'prompt':  'Quelle année avez-vous entendue ?',
-        'hint':    'Type the 4-digit year, e.g. 1998',
+        'hint':    'ex. : 1998',
     }
 
 
@@ -54,12 +54,12 @@ def generate_price():
         spoken  = f"{euros} euros"
         answer  = str(euros)
         display = f"{euros} €"
-        hint    = f'Type the euro amount, e.g. {euros}'
+        hint    = 'ex. : 123'
     else:
         spoken  = f"{euros} euros {cents} centimes"
         answer  = f"{euros}.{cents:02d}"
         display = f"{euros},{cents:02d} €"
-        hint    = f'Type euros and cents, e.g. {euros}.{cents:02d} or {euros},{cents:02d}'
+        hint    = 'ex. : 123,45 ou 123.45'
 
     return {
         'type':    'price',
@@ -91,7 +91,7 @@ def generate_large_number():
         'answer':  str(n),
         'display': display,
         'prompt':  'Quel nombre avez-vous entendu ?',
-        'hint':    'Type the number without spaces or punctuation',
+        'hint':    'ex. : 1234567',
     }
 
 

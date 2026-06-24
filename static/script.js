@@ -1,7 +1,8 @@
 /* ── State ──────────────────────────────────────────────── */
-let currentItem   = null;
-let answered      = false;
-let sessionActive = false;
+let currentItem     = null;
+let answered        = false;
+let sessionActive   = false;
+let pendingComplete = null;  // holds final session status until user presses Next
 let prefs = {
   voice_pref:    'female',
   speed_pref:    'normal',
@@ -35,6 +36,7 @@ const startSessionBtn = document.getElementById('start-session-btn');
 const newSessionBtn   = document.getElementById('new-session-btn');
 const redoSessionBtn  = document.getElementById('redo-session-btn');
 const sessionSizeInput = document.getElementById('session-size-input');
+const euroSymbol      = document.getElementById('euro-symbol');
 
 
 /* ── Web Speech API ─────────────────────────────────────── */
@@ -43,17 +45,30 @@ const sessionSizeInput = document.getElementById('session-size-input');
 let voicesLoaded = false;
 speechSynthesis.addEventListener('voiceschanged', () => { voicesLoaded = true; });
 
+// Strip accents so "Amélie" matches "amelie", etc.
+function asciify(s) {
+  return s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+}
+
 function getFrenchVoice(preferMale) {
   const voices = speechSynthesis.getVoices();
   const fr = voices.filter(v => v.lang.startsWith('fr'));
   if (!fr.length) return null;
 
-  const maleParts   = ['thomas', 'pierre', 'male', 'homme'];
-  const femaleParts = ['amelie', 'marie', 'juliette', 'female', 'femme'];
+  const maleParts   = ['thomas', 'pierre', 'nicolas', 'male', 'homme'];
+  const femaleParts = ['amelie', 'aurelie', 'marie', 'juliette', 'female', 'femme'];
   const targets = preferMale ? maleParts : femaleParts;
 
-  const match = fr.find(v => targets.some(t => v.name.toLowerCase().includes(t)));
-  return match || fr[0];
+  const match = fr.find(v => targets.some(t => asciify(v.name).includes(t)));
+  if (match) return match;
+
+  // Secondary fallback for female: pick any non-Thomas voice
+  if (!preferMale) {
+    const nonMale = fr.find(v => !asciify(v.name).includes('thomas'));
+    if (nonMale) return nonMale;
+  }
+
+  return fr[0];
 }
 
 function speak(text) {
@@ -78,7 +93,10 @@ function replayCurrentItem() {
   if (currentItem) speak(currentItem.spoken);
 }
 
-playBtn.addEventListener('click', replayCurrentItem);
+playBtn.addEventListener('click', () => {
+  replayCurrentItem();
+  if (!answered) answerInput.focus();
+});
 
 
 /* ── Preferences panel ──────────────────────────────────── */
@@ -183,6 +201,12 @@ function updateProgress(status) {
 /* ── Load next item ─────────────────────────────────────── */
 
 async function loadItem() {
+  if (pendingComplete) {
+    showComplete(pendingComplete);
+    pendingComplete = null;
+    return;
+  }
+
   answered = false;
   nextBtn.classList.add('hidden');
   completeCard.classList.add('hidden');
@@ -209,6 +233,8 @@ async function loadItem() {
   currentItem = await resp.json();
   promptTextEl.textContent = currentItem.prompt;
   hintTextEl.textContent   = currentItem.hint || '';
+  // Show € label only for price exercises
+  euroSymbol.classList.toggle('hidden', currentItem.type !== 'price');
 
   // Auto-play after a brief moment (lets voices initialise)
   setTimeout(() => speak(currentItem.spoken), 300);
@@ -253,13 +279,11 @@ async function submitAnswer() {
   const ss = result.session_status;
   if (ss) {
     updateProgress(ss);
-    if (ss.complete) {
-      setTimeout(() => showComplete(ss), 700);
-      return;
-    }
+    if (ss.complete) pendingComplete = ss;
   }
 
   nextBtn.classList.remove('hidden');
+  nextBtn.focus();
 }
 
 function showComplete(ss) {
@@ -276,6 +300,13 @@ answerInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') submitAnswer();
 });
 nextBtn.addEventListener('click', loadItem);
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'r' || e.key === 'R') {
+    // Only fire when focus is not inside the answer input
+    if (document.activeElement !== answerInput) replayCurrentItem();
+  }
+});
 
 
 /* ── Init ───────────────────────────────────────────────── */
