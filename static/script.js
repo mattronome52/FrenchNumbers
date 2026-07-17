@@ -41,9 +41,15 @@ const euroSymbol      = document.getElementById('euro-symbol');
 
 /* ── Web Speech API ─────────────────────────────────────── */
 
-// Voices load asynchronously; cache once available
-let voicesLoaded = false;
-speechSynthesis.addEventListener('voiceschanged', () => { voicesLoaded = true; });
+// Voices load asynchronously on some browsers (notably Chrome).
+// speakWhenReady() waits for them before calling speak().
+function speakWhenReady(text) {
+  if (speechSynthesis.getVoices().length > 0) {
+    speak(text);
+  } else {
+    speechSynthesis.addEventListener('voiceschanged', () => speak(text), { once: true });
+  }
+}
 
 // Strip accents so "Amélie" matches "amelie", etc.
 function asciify(s) {
@@ -236,8 +242,8 @@ async function loadItem() {
   // Show € label only for price exercises
   euroSymbol.classList.toggle('hidden', currentItem.type !== 'price');
 
-  // Auto-play after a brief moment (lets voices initialise)
-  setTimeout(() => speak(currentItem.spoken), 300);
+  // Auto-play, waiting for voices to be ready if needed
+  speakWhenReady(currentItem.spoken);
 
   answerInput.focus();
 }
